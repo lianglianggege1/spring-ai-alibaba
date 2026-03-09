@@ -24,6 +24,9 @@ import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
 
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ToolContext;
+import org.springframework.ai.minimax.MiniMaxChatModel;
+import org.springframework.ai.minimax.MiniMaxChatOptions;
+import org.springframework.ai.minimax.api.MiniMaxApi;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.annotation.Tool;
@@ -58,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * 3. ToolNames - Using tool names with ToolCallbackResolver
  * 4. ToolCallbackResolver - Custom tool resolution
  */
-@EnabledIfEnvironmentVariable(named = "AI_DASHSCOPE_API_KEY", matches = ".+")
+@EnabledIfEnvironmentVariable(named = "AI_MINIMAX_API_KEY", matches = ".+")
 class ToolCallbackTest {
 
 	private ChatModel chatModel;
@@ -197,14 +200,23 @@ class ToolCallbackTest {
 	@BeforeEach
 	void setUp() {
 		// Create DashScopeApi instance using the API key from environment variable
-		DashScopeApi dashScopeApi = DashScopeApi.builder()
-				.apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
-				.build();
+		// DashScopeApi dashScopeApi = DashScopeApi.builder()
+		// 		.apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
+		// 		.build();
+		MiniMaxApi miniMaxApi = new MiniMaxApi(
+				System.getenv("AI_MINIMAX_API_KEY")
+		);
 
 		// Create DashScope ChatModel instance
-		this.chatModel = DashScopeChatModel.builder()
-				.dashScopeApi(dashScopeApi)
-				.build();
+		// this.chatModel = DashScopeChatModel.builder()
+		// 		.dashScopeApi(dashScopeApi)
+		// 		.build();
+		this.chatModel = new MiniMaxChatModel(miniMaxApi,
+				MiniMaxChatOptions.builder()
+						.model("MiniMax-M2.5")
+						.maxTokens(1000)
+						.build()
+		);
 	}
 
 	/**
